@@ -32,7 +32,7 @@ def get_text_chunks(text):
     chunks = text_splitter.split_text(text)
     return chunks
 
-
+@st.cache_data 
 def get_vector_store(text_chunks):
     vector_store = FAISS.from_texts(text_chunks, embedding=google_embeddings)
     vector_store.save_local("faiss_db")
@@ -79,7 +79,6 @@ def response_generator(response):
 st.set_page_config("Document QnA", layout="centered")
 st.title("Document QnA Chatbot :robot_face:")
 
-
 with st.sidebar:
     uploaded_file = st.file_uploader("**Upload PDFs**", type=['pdf'], accept_multiple_files=True)
     if st.button("Generate and Save as Vectos"):
@@ -88,6 +87,9 @@ with st.sidebar:
                 text = get_pdf_text(uploaded_file)
                 chunks = get_text_chunks(text)
                 vectorstore = get_vector_store(chunks)
+                if 'vectorstore' not in st.session_state.keys():
+                    st.session_state['vectorstore'] = vectorstore
+
         st.success("Vectors saved successfully ✅")
     st.button('Clear Chat History', on_click=clear_chat_history)
 
@@ -107,7 +109,7 @@ if user_prompt := st.chat_input("Type your query here"):
 if st.session_state.messages[-1]["role"] == "user":
     with st.chat_message("assistant"):
         with st.spinner("Please wait.."):
-            response = str(get_llm_chain(user_prompt, vectorstore))
+            response = str(get_llm_chain(user_prompt, st.session_state['vectorstore']))
             st.write_stream(response_generator(response))
 
     message = {"role": "assistant", "content": response}
