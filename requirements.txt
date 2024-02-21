@@ -8,3 +8,4 @@ google-generativeai
 python-dotenv
 chromadb
 langchain_google_genai
+faiss-cpu

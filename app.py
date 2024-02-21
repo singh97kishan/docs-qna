@@ -36,8 +36,9 @@ def get_text_chunks(text):
 def get_vector_store(text_chunks):
     vector_store = FAISS.from_texts(text_chunks, embedding=google_embeddings)
     vector_store.save_local("faiss_db")
+    return vector_store
 
-def get_llm_chain(user_question):
+def get_llm_chain(user_question, vectorstore):
     prompt_template = """
     Answer the question as detailed as possible from the provided context, make sure to provide all the details,
     if the asnwer is not in provided context just respond, "Answer is not available in the context", don't provide
@@ -52,7 +53,7 @@ def get_llm_chain(user_question):
 
 
     google_embeddings =  GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    vectorstore = FAISS.load_local("faiss_db", google_embeddings)
+    #vectorstore = FAISS.load_local("faiss_db", google_embeddings)
     retriever = vectorstore.as_retriever()
 
     rag_chain = (
@@ -86,7 +87,7 @@ with st.sidebar:
             with st.spinner("Processing..."):
                 text = get_pdf_text(uploaded_file)
                 chunks = get_text_chunks(text)
-                get_vector_store(chunks)
+                vectorstore = get_vector_store(chunks)
         st.success("Vectors saved successfully ✅")
     st.button('Clear Chat History', on_click=clear_chat_history)
 
@@ -106,7 +107,7 @@ if user_prompt := st.chat_input("Type your query here"):
 if st.session_state.messages[-1]["role"] == "user":
     with st.chat_message("assistant"):
         with st.spinner("Please wait.."):
-            response = str(get_llm_chain(user_prompt))
+            response = str(get_llm_chain(user_prompt, vectorstore))
             st.write_stream(response_generator(response))
 
     message = {"role": "assistant", "content": response}
