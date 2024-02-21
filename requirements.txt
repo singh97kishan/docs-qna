@@ -1,0 +1,10 @@
+llama-index
+streamlit
+PyPDF2
+pypdf
+openai
+langchain
+google-generativeai
+python-dotenv
+chromadb
+langchain_google_genai
