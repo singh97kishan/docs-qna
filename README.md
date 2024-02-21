@@ -24,4 +24,4 @@ Let's breakdown the working of the app into chunks to make it easier to understa
 * Display the results in a Chatbot (Interface)
 
 ## Display the results in a Chatbot (Interface)
-![alt text](imgs\app_screenshot2.png)
+<img src="imgs\app_screenshot2.png" alt="alt text" width="800" height="400">
